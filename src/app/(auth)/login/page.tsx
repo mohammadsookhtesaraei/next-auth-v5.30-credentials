@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useState } from "react";
-
+import { signIn } from "next-auth/react";
 import toast, { Toaster } from 'react-hot-toast';
 
 interface FormT {
@@ -10,7 +10,7 @@ interface FormT {
   password: string;
 }
 
-const Register = () => {
+const Login = () => {
     //  یوز روتر 
  const router=useRouter();
 //  تعریف استیت برای مدیریت فرم ها
@@ -31,29 +31,18 @@ const Register = () => {
   const submitHandler=async(e: React.FormEvent<HTMLFormElement>)=>{
  
     e.preventDefault();
-    
-    try{
 
-     const res=await fetch('/api/auth/register',{
-        method:"POST",
-        body:JSON.stringify({email:formData.email,password:formData.password}),
-        headers:{"Content-Type":"application/json"}
+     const res=await signIn("credentials",{
+        email:formData.email,
+        password:formData.password,
+        redirect:false
      });
-
-     const data=await res.json();
-    //  اگر استاتوس موفق بیا پوش کن به ادرس مورد نظر
-     toast.success("ثبت‌نام با موفقیت انجام شد");
-     if(res.status === 201){
-      router.push("/")
+     if(res.error){
+        toast.error(res.error)
      }else {
-      toast.error(data.error || data.message || "خطای نامشخص");
+        router.push("/")
      }
-
-    }
-    catch(error:any){
-      toast.error(error?.message || "مشکلی رخ داد");
-    }
-  }
+  };
 
 
 
@@ -85,11 +74,11 @@ const Register = () => {
             onChange={changeHandler}
           />
         </div>
-        <button className="mt-5 cursor-pointer bg-blue-500 w-6/12 self-center py-1.5 rounded-md text-white hover:scale-105 active:scale-95 transition-transform duration-200 ease-out" type="submit">submit</button>
+        <button className="mt-5 cursor-pointer bg-blue-500 w-6/12 self-center py-1.5 rounded-md text-white hover:scale-105 active:scale-95 transition-transform duration-200 ease-out" type="submit">Login</button>
       </form>
       <Toaster/>
     </div>
   );
 };
 
-export default Register;
+export default Login;
